@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 from datetime import datetime
@@ -22,25 +23,39 @@ else:
 # Formulario
 with st.form("registro_mindray"):
     fecha_hora = st.text_input("📅 Fecha y Hora", value=datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    actividad = st.selectbox("🔧 Actividad Realizada", [
+
+    actividad = st.multiselect("🔧 Actividad Realizada", [
         "Eliminacion de Desechos", "Limpieza Sonda de Muestra", "Ab Limp Electrica", "Desobs",
         "Baño WBC", "Baño RBC", "Baño DIFF", "Camara de flujo", "Sonda Muestra"
     ])
+
     operador = st.selectbox("👤 Operador", [
         "Anibal Saavedra", "Juan Ramos", "Nycole Farias", "Stefanie Maureira", "Maria J.Vera",
         "Felipe Fernandez", "Paula Gutierrez", "Paola Araya", "Maria Rodriguez", "Pamela Montenegro"
     ])
+
     submit = st.form_submit_button("✅ Guardar Registro")
 
     if submit:
-        nueva_fila = {
-            "Fecha y Hora": fecha_hora,
-            "Actividad": actividad,
-            "Operador": operador
-        }
-        df = pd.concat([df, pd.DataFrame([nueva_fila])], ignore_index=True)
+        if not actividad:
+            nueva_fila = {
+                "Fecha y Hora": fecha_hora,
+                "Actividad": "",
+                "Operador": operador
+            }
+            df = pd.concat([df, pd.DataFrame([nueva_fila])], ignore_index=True)
+        else:
+            nuevas_filas = []
+            for act in actividad:
+                nuevas_filas.append({
+                    "Fecha y Hora": fecha_hora,
+                    "Actividad": act,
+                    "Operador": operador
+                })
+            df = pd.concat([df, pd.DataFrame(nuevas_filas)], ignore_index=True)
+
         df.to_excel(EXCEL_FILE, index=False)
-        st.success("✅ Registro guardado correctamente.")
+        st.success("✅ Registro(s) guardado(s) correctamente.")
 
         # respaldo automático
         fecha_backup = datetime.now().strftime("%Y%m%d_%H%M%S")
